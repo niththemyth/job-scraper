@@ -6,7 +6,8 @@
 ## 1. Scope
 
 A containerized web app that:
-- Polls **Greenhouse, Lever, Ashby** ATS feeds (per-company) + **dedicated big-tech adapters**
+- Polls **curated new-grad JSON feeds** (SimplifyJobs/New-Grad-Positions, vanshb03/New-Grad) +
+  **Greenhouse, Lever, Ashby** ATS feeds (per-company) + **dedicated big-tech adapters**
   (Amazon, Google, Microsoft, Apple, Meta, …) + **Adzuna** and **USAJobs** search APIs on a schedule.
 - Filters to **US-based, entry-level software-engineering** roles aligned to a resume profile
   (`config/profile.json`), scores each by skill overlap, normalizes into one schema, dedupes.
@@ -91,6 +92,31 @@ allow-list** (so Tier 2 brittleness is covered). USAJobs adds US federal SWE rol
 > Net effect: Tier 1 gives reliable unicorn/scaleup coverage, Tier 2 targets the giants directly,
 > Tier 3 backfills anything Tier 2 misses. Honest tradeoff: Tier 2 adapters are the maintenance risk.
 
+## 4.1 Curated new-grad feeds (highest alignment — add as top-priority tier)
+
+Community-maintained, automation-updated GitHub repos that publish **structured JSON** of
+**entry-level/new-grad** roles (US/Canada/Remote), with direct apply links. These are the best-aligned
+sources for a new grad and the lowest-maintenance (someone else does the scraping; we just read JSON):
+
+- **`SimplifyJobs/New-Grad-Positions`** — `listings.json` (raw:
+  `https://raw.githubusercontent.com/SimplifyJobs/New-Grad-Positions/dev/.github/scripts/listings.json`).
+  Fields include: `company_name`, `title`, `locations[]`, `url` (apply link), `date_posted` (unix),
+  `date_updated`, `active`, `is_visible`, `season`, **`sponsorship`** (e.g. "Offers Sponsorship" /
+  "Does Not Offer Sponsorship" / "U.S. Citizenship is Required"). Map directly to our schema; honor
+  `active`/`is_visible`.
+- **`vanshb03/New-Grad-2027`** — same `listings.json` format, overlapping but additional coverage.
+- These directly satisfy the **entry-level** requirement, so they bypass the §5.1 entry-level gate
+  (they're already new-grad), but still get **US filtering, resume match scoring, and dedupe**.
+- **`jobright-ai/2026-Software-Engineer-New-Grad`** — *optional, lower priority*: markdown-table only
+  (no JSON), last-7-days, links redirect through `jobright.ai` (may require login). If included, parse
+  the README table with a tolerant parser; expect breakage when their format changes. Recommend
+  deferring this until the JSON feeds are working.
+
+> ⚠️ These feeds aggregate the **same companies** our ATS/big-tech adapters hit, so a Stripe role can
+> arrive from both Greenhouse *and* Simplify. Cross-source dedupe (see §6) is now essential, keyed on a
+> canonical apply URL + normalized `company+title+location`, not just `source:external_id`.
+> Do **not** scrape jobright.ai or newgrad-jobs.com directly — consume the open JSON behind them.
+
 ## 5. US-only filtering
 - Adzuna `country=us`; USAJobs is US-federal by nature.
 - ATS + big-tech results: keep rows whose location resolves to a US state / "United States" / "Remote (US)".
@@ -171,8 +197,15 @@ CREATE TABLE scrape_runs (
 );
 ```
 
-Dedupe key = stable hash of `source:external_id`. Re-scrapes **upsert**: bump `last_seen`, never
-overwrite `first_seen`, `status`, or `alerted_at`.
+**Dedupe (two levels):**
+1. Same-source identity = stable hash of `source:external_id` (primary key).
+2. **Cross-source identity** = a `canonical_key` column = hash of normalized apply URL (strip query
+   params/trackers) OR normalized `company|title|location`. Because the new-grad feeds (§4.1) and our
+   ATS/big-tech adapters surface the same roles, the writer checks `canonical_key` before insert and
+   merges duplicates into one row (preferring the source with the most direct apply URL and a real
+   `date_posted`). Add `CREATE INDEX idx_jobs_canonical ON jobs(canonical_key);`.
+
+Re-scrapes **upsert**: bump `last_seen`, never overwrite `first_seen`, `status`, or `alerted_at`.
 
 ## 7. Alerts
 
@@ -249,6 +282,11 @@ big-tech feeds and a webhook out of the box (no paid signups required).
 ## 12. Sources config (`config/sources.json`, committed & editable)
 ```json
 {
+  "newgrad": {
+    "simplify":  "https://raw.githubusercontent.com/SimplifyJobs/New-Grad-Positions/dev/.github/scripts/listings.json",
+    "vanshb03":  "https://raw.githubusercontent.com/vanshb03/New-Grad-2027/main/.github/scripts/listings.json",
+    "jobrightMarkdown": false
+  },
   "greenhouse": ["stripe","databricks","airbnb","coinbase","reddit","pinterest","dropbox",
                  "doordash","instacart","snowflake","datadog","gitlab","cloudflare","robinhood",
                  "figma","lyft","twitch","asana","affirm","discord"],
@@ -275,7 +313,7 @@ job-scraper/
 │  ├─ alerter.js          # digest + channels
 │  ├─ api/jobs.js
 │  ├─ scrapers/
-│  │   ├─ index.js  greenhouse.js  lever.js  ashby.js  adzuna.js  usajobs.js
+│  │   ├─ index.js  newgrad.js  greenhouse.js  lever.js  ashby.js  adzuna.js  usajobs.js
 │  │   └─ bigtech/{amazon,google,microsoft,apple,meta}.js
 │  ├─ lib/{http,normalize,filter,match,us-location,hash}.js
 │  └─ test/fixtures/      # saved JSON per source for offline dev/tests
@@ -284,8 +322,11 @@ job-scraper/
 
 ## 14. Build phases (for the CLI / superpowers session)
 1. **Scaffold** — package.json, db, config, `/api/health`, Docker. Boots clean.
-2. **One ATS adapter end-to-end** — Greenhouse → normalize → upsert → `/api/jobs`, using a **fixture**
-   so it works offline (sandbox may block outbound to these hosts; deploy target won't).
+2. **New-grad JSON feed adapter first** — `newgrad.js` reads SimplifyJobs/vanshb03 `listings.json` →
+   normalize → upsert → `/api/jobs`, using a **fixture** so it works offline. Highest-value source and
+   simplest (clean JSON), so it proves the pipeline end-to-end first.
+2b. **One ATS adapter** — Greenhouse → normalize → upsert, with a fixture (sandbox may block outbound;
+   deploy target won't).
 3. **Remaining ATS adapters** — Lever, Ashby (each with a fixture).
 4. **Big-tech adapters** — Amazon/Google/Microsoft/Apple/Meta (fixtures; verify endpoints where reachable).
 5. **Adzuna + USAJobs** (key-gated, skip-if-missing).
