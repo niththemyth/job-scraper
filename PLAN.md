@@ -180,6 +180,10 @@ CREATE TABLE jobs (
   location     TEXT,
   is_us        INTEGER,            -- 1 if location matched US
   remote       INTEGER,
+  salary_min   INTEGER,            -- structured (Adzuna/USAJobs) or regex-parsed from description
+  salary_max   INTEGER,
+  salary_raw   TEXT,               -- original "$120k–$160k" string when only text is available
+  salary_currency TEXT DEFAULT 'USD',
   url          TEXT NOT NULL,      -- apply link
   description  TEXT,
   department   TEXT,
@@ -248,15 +252,24 @@ GET   /api/health
 ```
 
 ## 10. Dashboard (vanilla SPA)
+**Top bar:** live count of new jobs, last-scrape time, manual "Scrape now" button, and the sort/filter controls.
 - **Sort control** (dropdown): **Best match** (`match_score`), **Recently posted** (`posted_at`),
-  **Newest to me** (`first_seen` — when the scraper first saw it). Default newest-to-me; choice
-  persists in `localStorage`.
-- **NEW** badge for `first_seen` within `NEW_JOB_WINDOW_HOURS`.
-- Filters: source, company, search, remote-only, min match-score slider, entry-level-only toggle,
-  hide applied/hidden.
-- Card: title, company, location, age ("2h ago"), **match-score badge**, **Apply** (original posting),
-  **Mark applied**, **Hide**.
-- Auto-refresh every 60s; live new-job count. Responsive, dark-mode-friendly CSS.
+  **Newest to me** (`first_seen`), **Highest salary** (`salary_max`, jobs without salary sink to bottom).
+  Default newest-to-me; choice persists in `localStorage`.
+- **Filters:** source, company, search box, remote-only, **has-salary-only** toggle, min match-score
+  slider, entry-level-only toggle, hide applied/hidden.
+
+**Each job card shows:**
+- **Title** + **company** (with logo/initial)
+- **Location** (city, state / "Remote (US)") — always shown
+- **Salary** — `$min–$max` when available, else "—" (badge greyed when unknown)
+- **Match score** badge (skill overlap) + the matched skills as small chips
+- **Age** ("2h ago", from `first_seen`) and a **NEW** badge if within `NEW_JOB_WINDOW_HOURS`
+- **Source** badge (simplify / greenhouse / adzuna / …) and **sponsorship** tag (info only)
+- **Actions:** **Apply** (opens original posting), **Mark applied**, **Hide**
+
+- Auto-refresh every 60s; responsive, dark-mode-friendly CSS. Optional click-to-expand for the
+  truncated description.
 
 ## 11. Config & secrets (`.env.example`)
 ```
@@ -368,6 +381,10 @@ No external marketplace plugins required. Freebies in this env: **Playwright + C
 - **Scraping etiquette** — respect rate limits, set a real `User-Agent`, cache between polls; these are
   public JSON endpoints but don't hammer them. No LinkedIn/Indeed scraping (ToS + anti-bot).
 - **Adzuna/USAJobs need free API keys** — app runs without them (ATS + big-tech only), just narrower.
+- **Salary is partial, not universal** — only Adzuna/USAJobs expose it as structured data; ATS, big-tech,
+  and new-grad feeds usually don't, so it's regex-parsed from the description when present (pay-transparency
+  states) and shown as "—" otherwise. Expect many entry-level postings to have no salary. Location, by
+  contrast, is available on essentially every job.
 - **`posted_at` is not always provided** (some ATS/big-tech feeds omit or only give an updated date).
   "Recently posted" sort falls back to `first_seen` when `posted_at` is missing, so order stays sane.
   In practice "Newest to me" (`first_seen`) is the most reliable "just appeared" signal.
