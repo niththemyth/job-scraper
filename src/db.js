@@ -40,7 +40,8 @@ export function runMigrations(database = db) {
       is_active    INTEGER DEFAULT 1,
       status       TEXT DEFAULT 'new',
       alerted_at   TEXT,
-      canonical_key TEXT
+      canonical_key TEXT,
+      sponsorship  TEXT
     );
     CREATE INDEX IF NOT EXISTS idx_jobs_first_seen ON jobs(first_seen);
     CREATE INDEX IF NOT EXISTS idx_jobs_status     ON jobs(status);
@@ -52,6 +53,12 @@ export function runMigrations(database = db) {
       found INTEGER, added INTEGER, error TEXT
     );
   `);
+
+  // Additive migration: add sponsorship column to existing tables that predate it
+  const cols = database.prepare('PRAGMA table_info(jobs)').all();
+  if (!cols.some(c => c.name === 'sponsorship')) {
+    database.exec('ALTER TABLE jobs ADD COLUMN sponsorship TEXT');
+  }
 }
 
 /**

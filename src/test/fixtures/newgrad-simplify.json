@@ -1,0 +1,67 @@
+[
+  {
+    "id": "abc001",
+    "company_name": "Stripe",
+    "title": "Software Engineer, New Grad",
+    "locations": ["San Francisco, CA"],
+    "url": "https://stripe.com/jobs/listing/software-engineer/abc001",
+    "date_posted": 1719532800,
+    "date_updated": 1719619200,
+    "active": true,
+    "is_visible": true,
+    "season": "2025",
+    "sponsorship": "Does not sponsor"
+  },
+  {
+    "id": "abc002",
+    "company_name": "Databricks",
+    "title": "Software Engineer - New Grad",
+    "locations": ["Remote, US"],
+    "url": "https://databricks.com/company/careers/open-positions/job/abc002",
+    "date_posted": 1719619200,
+    "date_updated": 1719705600,
+    "active": true,
+    "is_visible": true,
+    "season": "2025",
+    "sponsorship": "Sponsorship Available"
+  },
+  {
+    "id": "abc003",
+    "company_name": "Acme Corp",
+    "title": "Software Developer",
+    "locations": ["New York, NY"],
+    "url": "https://acmecorp.com/careers/abc003",
+    "date_posted": 1718928000,
+    "date_updated": 1719014400,
+    "active": false,
+    "is_visible": true,
+    "season": "2025",
+    "sponsorship": null
+  },
+  {
+    "id": "abc004",
+    "company_name": "Shopify",
+    "title": "Software Engineer",
+    "locations": ["Ottawa, ON, Canada"],
+    "url": "https://shopify.com/careers/abc004",
+    "date_posted": 1719705600,
+    "date_updated": 1719792000,
+    "active": true,
+    "is_visible": true,
+    "season": "2025",
+    "sponsorship": "Does not sponsor"
+  },
+  {
+    "id": "abc005",
+    "company_name": "Airbnb",
+    "title": "Software Engineer, New Grad 2025",
+    "locations": ["Seattle, WA"],
+    "url": "https://careers.airbnb.com/positions/abc005",
+    "date_posted": 1719792000,
+    "date_updated": 1719878400,
+    "active": true,
+    "is_visible": false,
+    "season": "2025",
+    "sponsorship": "Sponsorship Available"
+  }
+]
