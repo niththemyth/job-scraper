@@ -155,9 +155,15 @@ ML/AI):
              "fastapi","flask","django","nestjs","postgresql","mysql","mongodb","aws","docker",
              "kubernetes","ci/cd","machine learning","pytorch","langchain","scikit-learn","cuda",
              "sql","rest"],
-  "minMatchScoreForAlert": 2
+  "minMatchScoreForAlert": 2,
+  "sponsorshipFilter": "none"
 }
 ```
+`sponsorshipFilter: "none"` → **do not filter on visa sponsorship** (candidate is authorized to work
+without sponsorship, so all roles qualify, including "Does Not Offer Sponsorship" and
+"U.S. Citizenship Required"). Simplify's `sponsorship` value is still **stored and shown as an info
+badge** on each card for context. (Other possible values if ever needed: `requires` = only roles that
+offer sponsorship; `exclude_citizenship` = hide citizenship-only roles.)
 Implemented in `src/lib/filter.js` (title + entry-level) and `src/lib/match.js` (scoring). The dashboard
 exposes a "min match score" slider and an "entry-level only" toggle so you can loosen/tighten live
 without editing the file.
