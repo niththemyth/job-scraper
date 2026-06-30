@@ -6,72 +6,24 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DatabaseSync } from 'node:sqlite';
-import { mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 
+import { createDb, runMigrations as runProductionMigrations } from '../db.js';
 import { hashId, canonicalKey } from '../lib/hash.js';
 
 // ---------------------------------------------------------------------------
-// Helper: create an isolated in-memory-like DB using a temp file, run
-// migrations against it, and return the db instance + cleanup fn.
+// Helper: create an isolated in-memory DB using the real production
+// createDb factory, and return the db instance + a runMigrations wrapper
+// that delegates to the real production function.
 // ---------------------------------------------------------------------------
 function createTempDb() {
-  const dir = mkdtempSync(join(tmpdir(), 'job-scraper-test-'));
-  const dbPath = join(dir, 'test.db');
-
-  // Override DB_PATH so db.js uses our temp file
-  process.env.DB_PATH = dbPath;
-
-  // Re-import db module with the overridden env — since ESM modules are cached,
-  // we instantiate a fresh DatabaseSync directly here for isolation.
-  const db = new DatabaseSync(dbPath);
+  const db = createDb(':memory:');
 
   function runMigrations() {
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS jobs (
-        id           TEXT PRIMARY KEY,
-        source       TEXT NOT NULL,
-        external_id  TEXT NOT NULL,
-        company      TEXT NOT NULL,
-        title        TEXT NOT NULL,
-        location     TEXT,
-        is_us        INTEGER,
-        remote       INTEGER,
-        salary_min   INTEGER,
-        salary_max   INTEGER,
-        salary_raw   TEXT,
-        salary_currency TEXT DEFAULT 'USD',
-        url          TEXT NOT NULL,
-        description  TEXT,
-        department   TEXT,
-        posted_at    TEXT,
-        seniority    TEXT,
-        min_years    INTEGER,
-        match_score  INTEGER DEFAULT 0,
-        first_seen   TEXT NOT NULL,
-        last_seen    TEXT NOT NULL,
-        is_active    INTEGER DEFAULT 1,
-        status       TEXT DEFAULT 'new',
-        alerted_at   TEXT,
-        canonical_key TEXT
-      );
-      CREATE INDEX IF NOT EXISTS idx_jobs_first_seen ON jobs(first_seen);
-      CREATE INDEX IF NOT EXISTS idx_jobs_status     ON jobs(status);
-      CREATE INDEX IF NOT EXISTS idx_jobs_canonical  ON jobs(canonical_key);
-
-      CREATE TABLE IF NOT EXISTS scrape_runs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        source TEXT, started_at TEXT, finished_at TEXT,
-        found INTEGER, added INTEGER, error TEXT
-      );
-    `);
+    runProductionMigrations(db);
   }
 
   function cleanup() {
     db.close();
-    rmSync(dir, { recursive: true, force: true });
   }
 
   return { db, runMigrations, cleanup };

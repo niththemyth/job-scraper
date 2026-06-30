@@ -8,17 +8,13 @@ import { dirname } from 'node:path';
 
 const DB_PATH = process.env.DB_PATH ?? './data/jobs.db';
 
-// Ensure the data directory exists
-mkdirSync(dirname(DB_PATH), { recursive: true });
-
-/** @type {DatabaseSync} */
-export const db = new DatabaseSync(DB_PATH);
-
 /**
  * Creates all tables and indexes if they don't already exist.
+ * Accepts an explicit db instance; falls back to the module-level default.
+ * @param {DatabaseSync} [database]
  */
-export function runMigrations() {
-  db.exec(`
+export function runMigrations(database = db) {
+  database.exec(`
     CREATE TABLE IF NOT EXISTS jobs (
       id           TEXT PRIMARY KEY,
       source       TEXT NOT NULL,
@@ -57,3 +53,19 @@ export function runMigrations() {
     );
   `);
 }
+
+/**
+ * Creates and initializes a new database instance at the given path.
+ * Runs all migrations before returning the instance.
+ * @param {string} dbPath - File path or ':memory:'
+ * @returns {DatabaseSync}
+ */
+export function createDb(dbPath) {
+  mkdirSync(dirname(dbPath), { recursive: true });
+  const instance = new DatabaseSync(dbPath);
+  runMigrations(instance);
+  return instance;
+}
+
+/** @type {DatabaseSync} */
+export const db = createDb(DB_PATH);
