@@ -198,7 +198,8 @@ overwrite `first_seen`, `status`, or `alerted_at`.
 
 ## 9. API
 ```
-GET   /api/jobs?status=&source=&company=&q=&remote=&since=&limit=&offset=  → { jobs, total }
+GET   /api/jobs?status=&source=&company=&q=&remote=&since=&minScore=&sort=&limit=&offset=  → { jobs, total }
+        sort = newest (default, by first_seen desc) | posted (posted_at desc) | match (match_score desc, tie-break first_seen desc)
 GET   /api/jobs/:id
 PATCH /api/jobs/:id            { status: 'applied'|'hidden'|'new' }
 GET   /api/sources            → config + last run stats (shows dead slugs)
@@ -208,9 +209,14 @@ GET   /api/health
 ```
 
 ## 10. Dashboard (vanilla SPA)
-- Newest-first feed; **NEW** badge for `first_seen` within `NEW_JOB_WINDOW_HOURS`.
-- Filters: source, company, search, remote-only, hide applied/hidden.
-- Card: title, company, location, age ("2h ago"), **Apply** (original posting), **Mark applied**, **Hide**.
+- **Sort control** (dropdown): **Best match** (`match_score`), **Recently posted** (`posted_at`),
+  **Newest to me** (`first_seen` — when the scraper first saw it). Default newest-to-me; choice
+  persists in `localStorage`.
+- **NEW** badge for `first_seen` within `NEW_JOB_WINDOW_HOURS`.
+- Filters: source, company, search, remote-only, min match-score slider, entry-level-only toggle,
+  hide applied/hidden.
+- Card: title, company, location, age ("2h ago"), **match-score badge**, **Apply** (original posting),
+  **Mark applied**, **Hide**.
 - Auto-refresh every 60s; live new-job count. Responsive, dark-mode-friendly CSS.
 
 ## 11. Config & secrets (`.env.example`)
@@ -315,3 +321,6 @@ No external marketplace plugins required. Freebies in this env: **Playwright + C
 - **Scraping etiquette** — respect rate limits, set a real `User-Agent`, cache between polls; these are
   public JSON endpoints but don't hammer them. No LinkedIn/Indeed scraping (ToS + anti-bot).
 - **Adzuna/USAJobs need free API keys** — app runs without them (ATS + big-tech only), just narrower.
+- **`posted_at` is not always provided** (some ATS/big-tech feeds omit or only give an updated date).
+  "Recently posted" sort falls back to `first_seen` when `posted_at` is missing, so order stays sane.
+  In practice "Newest to me" (`first_seen`) is the most reliable "just appeared" signal.
