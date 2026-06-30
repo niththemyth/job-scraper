@@ -8,7 +8,8 @@
 A containerized web app that:
 - Polls **Greenhouse, Lever, Ashby** ATS feeds (per-company) + **dedicated big-tech adapters**
   (Amazon, Google, Microsoft, Apple, Meta, …) + **Adzuna** and **USAJobs** search APIs on a schedule.
-- Filters to **US-based software-engineering** roles, normalizes them into one schema, dedupes.
+- Filters to **US-based, entry-level software-engineering** roles aligned to a resume profile
+  (`config/profile.json`), scores each by skill overlap, normalizes into one schema, dedupes.
 - Stores them in SQLite with a `first_seen` timestamp so "newly posted" is meaningful.
 - **Sends alerts** (email + Discord/Slack webhook) the moment new matching jobs appear.
 - Serves a **dashboard** to browse/filter/search, newest-first, with one-click **Apply** links and
@@ -96,6 +97,45 @@ allow-list** (so Tier 2 brittleness is covered). USAJobs adds US federal SWE rol
   Maintain a small US-location matcher (state names + abbreviations + "remote us"); drop clearly non-US.
 - `remote` flag is best-effort; `REMOTE_ONLY` env can further narrow.
 
+## 5.1 Job matching profile (entry-level + resume-aligned)
+
+A single editable file **`config/profile.json`** drives *which* jobs count — no code changes needed.
+Three stages applied to every normalized job:
+
+1. **Title filter** — keep if title matches `includeTitles`, drop if it matches `excludeTitles`
+   (`senior`, `staff`, `principal`, `lead`, `manager`, `intern`, `II/III/IV`, `sr`). This removes
+   non-entry roles before anything else.
+2. **Entry-level gate** — regex the description for experience requirements
+   (`/(\d+)\+?\s*years/`, "minimum N years", etc.); set `min_years`. If `entryLevelOnly` and
+   `min_years > maxYearsExperience` (default 2), drop it. Roles with no stated requirement pass.
+   Also infer `seniority` from title/keywords (`new grad`/`entry`/`junior` → entry).
+3. **Resume match score** — count overlap between the job's title+description and `skills`; store as
+   `match_score`. Used to **sort newest-and-best first** and to **gate alerts**
+   (`match_score >= minMatchScoreForAlert`). Nothing is deleted for a low score — it just ranks lower
+   and won't trigger an alert.
+
+Starter profile derived from the attached resume (Nithin Boopalan — UIUC CompE, Dec 2026, full-stack +
+ML/AI):
+```json
+{
+  "includeTitles": ["software engineer","software developer","swe","full stack","backend","frontend",
+                    "new grad","new graduate","early career","associate software engineer",
+                    "member of technical staff","application developer","ml engineer","ai engineer"],
+  "excludeTitles": ["senior","sr.","staff","principal","lead","manager","director","architect",
+                    "intern","ii","iii","iv"],
+  "entryLevelOnly": true,
+  "maxYearsExperience": 2,
+  "skills": ["python","go","golang","c++","java","javascript","typescript","react","node","express",
+             "fastapi","flask","django","nestjs","postgresql","mysql","mongodb","aws","docker",
+             "kubernetes","ci/cd","machine learning","pytorch","langchain","scikit-learn","cuda",
+             "sql","rest"],
+  "minMatchScoreForAlert": 2
+}
+```
+Implemented in `src/lib/filter.js` (title + entry-level) and `src/lib/match.js` (scoring). The dashboard
+exposes a "min match score" slider and an "entry-level only" toggle so you can loosen/tighten live
+without editing the file.
+
 ## 6. Data model (SQLite)
 
 ```sql
@@ -112,6 +152,9 @@ CREATE TABLE jobs (
   description  TEXT,
   department   TEXT,
   posted_at    TEXT,               -- source date if available
+  seniority    TEXT,               -- inferred: entry|mid|senior|unknown
+  min_years    INTEGER,            -- years experience required, parsed from description (NULL if none)
+  match_score  INTEGER DEFAULT 0,  -- overlap with resume skills (drives ranking + alert gate)
   first_seen   TEXT NOT NULL,      -- when WE first saw it (drives "new" + alerts)
   last_seen    TEXT NOT NULL,
   is_active    INTEGER DEFAULT 1,
@@ -138,7 +181,10 @@ overwrite `first_seen`, `status`, or `alerted_at`.
 - **Trigger:** after each scrape run, select jobs with `alerted_at IS NULL` that match alert filters,
   send a **single digest** (not one message per job), then stamp `alerted_at`. Guarantees no
   double-alerts and no spam storms.
-- **Filters:** `ALERT_KEYWORDS`, optional company allow-list, `REMOTE_ONLY`, US-only (always on here).
+- **Filters:** alerts only fire for jobs that already passed the matching profile (§5.1) — i.e.
+  **entry-level, US, and `match_score >= minMatchScoreForAlert`**. `ALERT_KEYWORDS` / company
+  allow-list / `REMOTE_ONLY` narrow further. So you're alerted on entry-level SWE roles that fit your
+  resume, not every posting.
 - **Rate control:** `ALERT_MIN_INTERVAL_MINUTES` to batch bursts.
 - Manual test endpoint `POST /api/alerts/test`.
 - ⚠️ The **Gmail MCP available in the build session is build-time only** — a deployed container can't
@@ -214,7 +260,7 @@ big-tech feeds and a webhook out of the box (no paid signups required).
 job-scraper/
 ├─ Dockerfile  docker-compose.yml  .dockerignore  .env.example  .gitignore
 ├─ package.json  PLAN.md  CLAUDE.md
-├─ config/sources.json
+├─ config/sources.json  config/profile.json
 ├─ src/
 │  ├─ index.js            # express + static + boot scrape + scheduler
 │  ├─ db.js               # node:sqlite + migrations
@@ -225,7 +271,7 @@ job-scraper/
 │  ├─ scrapers/
 │  │   ├─ index.js  greenhouse.js  lever.js  ashby.js  adzuna.js  usajobs.js
 │  │   └─ bigtech/{amazon,google,microsoft,apple,meta}.js
-│  ├─ lib/{http,normalize,filter,us-location,hash}.js
+│  ├─ lib/{http,normalize,filter,match,us-location,hash}.js
 │  └─ test/fixtures/      # saved JSON per source for offline dev/tests
 └─ public/{index.html,app.js,styles.css}
 ```
@@ -237,7 +283,7 @@ job-scraper/
 3. **Remaining ATS adapters** — Lever, Ashby (each with a fixture).
 4. **Big-tech adapters** — Amazon/Google/Microsoft/Apple/Meta (fixtures; verify endpoints where reachable).
 5. **Adzuna + USAJobs** (key-gated, skip-if-missing).
-6. **Filtering (SWE + US-only) + dedupe + scheduler.**
+6. **Filtering (SWE + US-only) + entry-level gate + resume match scoring (`config/profile.json`) + dedupe + scheduler.**
 7. **Alerter** (email + webhook + digest dedupe).
 8. **Dashboard.**
 9. **Dockerize + compose + README + verify run.**
