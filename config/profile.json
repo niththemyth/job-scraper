@@ -1,0 +1,15 @@
+{
+  "includeTitles": ["software engineer","software developer","swe","full stack","backend","frontend",
+                    "new grad","new graduate","early career","associate software engineer",
+                    "member of technical staff","application developer","ml engineer","ai engineer"],
+  "excludeTitles": ["senior","sr.","staff","principal","lead","manager","director","architect",
+                    "intern","ii","iii","iv"],
+  "entryLevelOnly": true,
+  "maxYearsExperience": 2,
+  "skills": ["python","go","golang","c++","java","javascript","typescript","react","node","express",
+             "fastapi","flask","django","nestjs","postgresql","mysql","mongodb","aws","docker",
+             "kubernetes","ci/cd","machine learning","pytorch","langchain","scikit-learn","cuda",
+             "sql","rest"],
+  "minMatchScoreForAlert": 2,
+  "sponsorshipFilter": "none"
+}

@@ -1,0 +1,16 @@
+{
+  "newgrad": {
+    "simplify":  "https://raw.githubusercontent.com/SimplifyJobs/New-Grad-Positions/dev/.github/scripts/listings.json",
+    "vanshb03":  "https://raw.githubusercontent.com/vanshb03/New-Grad-2027/main/.github/scripts/listings.json",
+    "jobrightMarkdown": false
+  },
+  "greenhouse": ["stripe","databricks","airbnb","coinbase","reddit","pinterest","dropbox",
+                 "doordash","instacart","snowflake","datadog","gitlab","cloudflare","robinhood",
+                 "figma","lyft","twitch","asana","affirm","discord"],
+  "lever": ["netflix","plaid","palantir","brex"],
+  "ashby": ["openai","ramp","linear","notion","perplexity-ai"],
+  "bigtech": ["amazon","google","microsoft","apple","meta"],
+  "adzuna":  { "country": "us", "queries": ["software engineer","backend engineer","frontend engineer"],
+               "companyAllowList": ["Google","Amazon","Apple","Microsoft","Meta","Nvidia","Netflix"] },
+  "usajobs": { "queries": ["software engineer","IT specialist"] }
+}
