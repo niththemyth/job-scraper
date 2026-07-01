@@ -254,6 +254,7 @@ function renderCard(job, card) {
   const avatarLetter  = (job.company ?? '?').trim()[0].toUpperCase();
   const matchedSkills = getMatchedSkills(job);
   const hasLongDesc   = (job.description ?? '').length > 400;
+  const safeUrl       = /^https?:\/\//i.test(job.url ?? '') ? job.url : '#';
 
   card.dataset.jobId  = job.id;
   card.className      = `job-card${job.status === 'applied' ? ' status-applied' : ''}`;
@@ -275,7 +276,7 @@ function renderCard(job, card) {
     </div>
 
     <div class="card-badges">
-      <span class="badge score-badge ${scoreClass}" title="Match score">${job.match_score ?? 0}/10</span>
+      <span class="badge score-badge ${scoreClass}" title="Match score">${esc(String(job.match_score ?? 0))}/10</span>
       ${isNew ? '<span class="badge badge-new">NEW</span>' : ''}
       <span class="badge badge-source">${esc(job.source)}</span>
       ${job.sponsorship ? `<span class="badge badge-sponsorship" title="Sponsorship">${esc(job.sponsorship)}</span>` : ''}
@@ -294,7 +295,7 @@ function renderCard(job, card) {
     </div>` : ''}
 
     <div class="card-actions">
-      <a href="${esc(job.url)}" target="_blank" rel="noopener noreferrer" class="btn btn-apply">Apply ↗</a>
+      <a href="${esc(safeUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-apply">Apply ↗</a>
       <button
         class="btn btn-applied${job.status === 'applied' ? ' active' : ''}"
         type="button"
@@ -332,6 +333,12 @@ function renderCard(job, card) {
 function renderPagination() {
   // Salary sort fetches all at once client-side — no pagination needed
   if (state.sort === 'salary') {
+    paginationEl.innerHTML = '';
+    return;
+  }
+  // Client-side filters (hasSalary, entryLevelOnly) reduce results client-side;
+  // hide pagination to avoid misleading counts
+  if (state.filters.hasSalary || state.filters.entryLevelOnly) {
     paginationEl.innerHTML = '';
     return;
   }
