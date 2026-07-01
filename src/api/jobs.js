@@ -1,21 +1,25 @@
 /**
  * @file api/jobs.js
- * @description Express router for the /api/jobs endpoints.
+ * @description Express router for the /api/jobs, /api/scrape, and /api/sources endpoints.
  *
  * GET  /api/jobs            — list/filter jobs with pagination
  * GET  /api/jobs/:id        — single job or 404
  * PATCH /api/jobs/:id       — update job status only
+ * POST /api/scrape          — trigger an immediate scrape run
+ * GET  /api/sources         — list configured sources with last scrape_run stats
  */
 import { Router } from 'express';
+import { runAllScrapers } from '../scheduler.js';
 
 /**
- * Creates and returns an Express Router with all /jobs routes bound to the
- * provided db instance. Accepts an injectable db for testability.
+ * Creates and returns an Express Router with all /jobs, /scrape, and /sources routes
+ * bound to the provided db instance. Accepts an injectable db for testability.
  *
  * @param {import('node:sqlite').DatabaseSync} db
+ * @param {{ env: object, sources: object, profile: object }} [config]
  * @returns {import('express').Router}
  */
-export function createJobsRouter(db) {
+export function createJobsRouter(db, config = {}) {
   const router = Router();
 
   /**
@@ -136,6 +140,56 @@ export function createJobsRouter(db) {
 
     const updated = db.prepare('SELECT * FROM jobs WHERE id = ?').get(req.params.id);
     return res.json(updated);
+  });
+
+  /**
+   * POST /scrape — trigger an immediate full scrape run
+   * Response: { triggered: true }
+   */
+  router.post('/scrape', (req, res) => {
+    // Fire-and-forget — don't await
+    runAllScrapers(db, config).catch(err => {
+      console.error('[api] /scrape error:', err.message);
+    });
+    return res.json({ triggered: true });
+  });
+
+  /**
+   * GET /sources — list configured sources with their last scrape_run stats
+   *
+   * Response: Array of { source, lastRun: { started_at, finished_at, found, added, error } | null }
+   */
+  router.get('/sources', (req, res) => {
+    // Get the latest run per source from scrape_runs
+    const latestRuns = db.prepare(`
+      SELECT source, started_at, finished_at, found, added, error
+      FROM scrape_runs
+      WHERE rowid IN (
+        SELECT MAX(rowid) FROM scrape_runs GROUP BY source
+      )
+    `).all();
+
+    const runsBySource = {};
+    for (const run of latestRuns) {
+      runsBySource[run.source] = {
+        started_at: run.started_at,
+        finished_at: run.finished_at,
+        found: run.found,
+        added: run.added,
+        error: run.error,
+      };
+    }
+
+    // Build the source list from config
+    const configSources = config.sources ?? {};
+    const sourceNames = Object.keys(configSources);
+
+    const response = sourceNames.map(source => ({
+      source,
+      lastRun: runsBySource[source] ?? null,
+    }));
+
+    return res.json(response);
   });
 
   return router;
