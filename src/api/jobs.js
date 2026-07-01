@@ -7,128 +7,136 @@
  * PATCH /api/jobs/:id       — update job status only
  */
 import { Router } from 'express';
-import { db } from '../db.js';
-
-const router = Router();
 
 /**
- * GET /api/jobs
+ * Creates and returns an Express Router with all /jobs routes bound to the
+ * provided db instance. Accepts an injectable db for testability.
  *
- * Query params:
- *   status    TEXT    — filter by status (new|applied|hidden)
- *   source    TEXT    — filter by source
- *   company   TEXT    — partial match on company name
- *   q         TEXT    — full-text search across title, company, description
- *   remote    '1'     — filter to remote jobs only
- *   since     ISO     — first_seen >= since
- *   minScore  INT     — match_score >= minScore
- *   sort      string  — newest (default) | posted | match
- *   limit     INT     — default 50, max 200
- *   offset    INT     — default 0
- *
- * Response: { jobs: [...], total: N }
+ * @param {import('node:sqlite').DatabaseSync} db
+ * @returns {import('express').Router}
  */
-router.get('/jobs', (req, res) => {
-  const {
-    status,
-    source,
-    company,
-    q,
-    remote,
-    since,
-    minScore,
-    sort = 'newest',
-    limit = '50',
-    offset = '0',
-  } = req.query;
+export function createJobsRouter(db) {
+  const router = Router();
 
-  const limitN = Math.min(parseInt(limit, 10) || 50, 200);
-  const offsetN = parseInt(offset, 10) || 0;
+  /**
+   * GET /jobs
+   *
+   * Query params:
+   *   status    TEXT    — filter by status (new|applied|hidden)
+   *   source    TEXT    — filter by source
+   *   company   TEXT    — partial match on company name
+   *   q         TEXT    — full-text search across title, company, description
+   *   remote    '1'     — filter to remote jobs only
+   *   since     ISO     — first_seen >= since
+   *   minScore  INT     — match_score >= minScore
+   *   sort      string  — newest (default) | posted | match
+   *   limit     INT     — default 50, max 200
+   *   offset    INT     — default 0
+   *
+   * Response: { jobs: [...], total: N }
+   */
+  router.get('/jobs', (req, res) => {
+    const {
+      status,
+      source,
+      company,
+      q,
+      remote,
+      since,
+      minScore,
+      sort = 'newest',
+      limit = '50',
+      offset = '0',
+    } = req.query;
 
-  const conditions = [];
-  const params = [];
+    const limitN = Math.min(parseInt(limit, 10) || 50, 200);
+    const offsetN = parseInt(offset, 10) || 0;
 
-  if (status) {
-    conditions.push('status = ?');
-    params.push(status);
-  }
-  if (source) {
-    conditions.push('source = ?');
-    params.push(source);
-  }
-  if (company) {
-    conditions.push('company LIKE ?');
-    params.push(`%${company}%`);
-  }
-  if (q) {
-    conditions.push('(title LIKE ? OR company LIKE ? OR description LIKE ?)');
-    params.push(`%${q}%`, `%${q}%`, `%${q}%`);
-  }
-  if (remote === '1' || remote === 'true') {
-    conditions.push('remote = 1');
-  }
-  if (since) {
-    conditions.push('first_seen >= ?');
-    params.push(since);
-  }
-  if (minScore) {
-    conditions.push('match_score >= ?');
-    params.push(parseInt(minScore, 10));
-  }
+    const conditions = [];
+    const params = [];
 
-  const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    if (status) {
+      conditions.push('status = ?');
+      params.push(status);
+    }
+    if (source) {
+      conditions.push('source = ?');
+      params.push(source);
+    }
+    if (company) {
+      conditions.push('company LIKE ?');
+      params.push(`%${company}%`);
+    }
+    if (q) {
+      conditions.push('(title LIKE ? OR company LIKE ? OR description LIKE ?)');
+      params.push(`%${q}%`, `%${q}%`, `%${q}%`);
+    }
+    if (remote === '1' || remote === 'true') {
+      conditions.push('remote = 1');
+    }
+    if (since) {
+      conditions.push('first_seen >= ?');
+      params.push(since);
+    }
+    if (minScore) {
+      conditions.push('match_score >= ?');
+      params.push(parseInt(minScore, 10));
+    }
 
-  let orderBy;
-  switch (sort) {
-    case 'posted':
-      orderBy = 'ORDER BY COALESCE(posted_at, first_seen) DESC';
-      break;
-    case 'match':
-      orderBy = 'ORDER BY match_score DESC, first_seen DESC';
-      break;
-    default: // 'newest'
-      orderBy = 'ORDER BY first_seen DESC';
-  }
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-  const countSql = `SELECT COUNT(*) AS total FROM jobs ${where}`;
-  const dataSql = `SELECT * FROM jobs ${where} ${orderBy} LIMIT ? OFFSET ?`;
+    let orderBy;
+    switch (sort) {
+      case 'posted':
+        orderBy = 'ORDER BY posted_at DESC, first_seen DESC';
+        break;
+      case 'match':
+        orderBy = 'ORDER BY match_score DESC, first_seen DESC';
+        break;
+      default: // 'newest'
+        orderBy = 'ORDER BY first_seen DESC';
+    }
 
-  const countRow = db.prepare(countSql).get(...params);
-  const jobs = db.prepare(dataSql).all(...params, limitN, offsetN);
+    const countSql = `SELECT COUNT(*) AS total FROM jobs ${where}`;
+    const dataSql = `SELECT * FROM jobs ${where} ${orderBy} LIMIT ? OFFSET ?`;
 
-  res.json({ jobs, total: countRow.total });
-});
+    const countRow = db.prepare(countSql).get(...params);
+    const jobs = db.prepare(dataSql).all(...params, limitN, offsetN);
 
-/**
- * GET /api/jobs/:id — single job or 404
- */
-router.get('/jobs/:id', (req, res) => {
-  const job = db.prepare('SELECT * FROM jobs WHERE id = ?').get(req.params.id);
-  if (!job) return res.status(404).json({ error: 'Job not found' });
-  return res.json(job);
-});
+    res.json({ jobs, total: countRow.total });
+  });
 
-/**
- * PATCH /api/jobs/:id — update job status only
- * Body: { status: 'applied' | 'hidden' | 'new' }
- */
-router.patch('/jobs/:id', (req, res) => {
-  const ALLOWED_STATUSES = ['applied', 'hidden', 'new'];
-  const { status } = req.body ?? {};
+  /**
+   * GET /jobs/:id — single job or 404
+   */
+  router.get('/jobs/:id', (req, res) => {
+    const job = db.prepare('SELECT * FROM jobs WHERE id = ?').get(req.params.id);
+    if (!job) return res.status(404).json({ error: 'Job not found' });
+    return res.json(job);
+  });
 
-  if (!status || !ALLOWED_STATUSES.includes(status)) {
-    return res
-      .status(400)
-      .json({ error: `status must be one of: ${ALLOWED_STATUSES.join(', ')}` });
-  }
+  /**
+   * PATCH /jobs/:id — update job status only
+   * Body: { status: 'applied' | 'hidden' | 'new' }
+   */
+  router.patch('/jobs/:id', (req, res) => {
+    const ALLOWED_STATUSES = ['applied', 'hidden', 'new'];
+    const { status } = req.body ?? {};
 
-  const existing = db.prepare('SELECT id FROM jobs WHERE id = ?').get(req.params.id);
-  if (!existing) return res.status(404).json({ error: 'Job not found' });
+    if (!status || !ALLOWED_STATUSES.includes(status)) {
+      return res
+        .status(400)
+        .json({ error: `status must be one of: ${ALLOWED_STATUSES.join(', ')}` });
+    }
 
-  db.prepare('UPDATE jobs SET status = ? WHERE id = ?').run(status, req.params.id);
+    const existing = db.prepare('SELECT id FROM jobs WHERE id = ?').get(req.params.id);
+    if (!existing) return res.status(404).json({ error: 'Job not found' });
 
-  const updated = db.prepare('SELECT * FROM jobs WHERE id = ?').get(req.params.id);
-  return res.json(updated);
-});
+    db.prepare('UPDATE jobs SET status = ? WHERE id = ?').run(status, req.params.id);
 
-export default router;
+    const updated = db.prepare('SELECT * FROM jobs WHERE id = ?').get(req.params.id);
+    return res.json(updated);
+  });
+
+  return router;
+}

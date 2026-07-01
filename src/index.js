@@ -5,9 +5,9 @@
 import express from 'express';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runMigrations } from './db.js';
+import { runMigrations, db } from './db.js';
 import { env } from './config.js';
-import jobsRouter from './api/jobs.js';
+import { createJobsRouter } from './api/jobs.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -24,7 +24,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 // 3. Jobs API
-app.use('/api', jobsRouter);
+app.use('/api', createJobsRouter(db));
 
 // 4. Serve static files from public/
 app.use(express.static(join(__dirname, '..', 'public')));
