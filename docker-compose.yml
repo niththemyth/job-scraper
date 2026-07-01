@@ -1,15 +1,10 @@
-version: '3.9'
-
 services:
   job-scraper:
     build: .
     ports:
       - "3000:3000"
     volumes:
-      - db-data:/app/data
+      - ./data:/app/data
     env_file:
       - .env
     restart: unless-stopped
-
-volumes:
-  db-data:
