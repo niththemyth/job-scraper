@@ -1,0 +1,37 @@
+{
+  "results": [
+    {
+      "id": "az-1001",
+      "title": "Software Engineer",
+      "company": { "display_name": "Google" },
+      "location": { "display_name": "Mountain View, CA" },
+      "description": "Build large-scale distributed systems at Google.",
+      "redirect_url": "https://www.adzuna.com/jobs/az-1001",
+      "created": "2026-06-01T00:00:00.000Z",
+      "salary_min": 130000,
+      "salary_max": 180000
+    },
+    {
+      "id": "az-1002",
+      "title": "Backend Engineer",
+      "company": { "display_name": "Amazon" },
+      "location": { "display_name": "Seattle, WA" },
+      "description": "Work on AWS distributed infrastructure.",
+      "redirect_url": "https://www.adzuna.com/jobs/az-1002",
+      "created": "2026-06-02T00:00:00.000Z",
+      "salary_min": 140000,
+      "salary_max": 200000
+    },
+    {
+      "id": "az-1003",
+      "title": "Frontend Engineer",
+      "company": { "display_name": "TechCorp" },
+      "location": { "display_name": "Austin, TX" },
+      "description": "Build beautiful user interfaces.",
+      "redirect_url": "https://www.adzuna.com/jobs/az-1003",
+      "created": "2026-06-03T00:00:00.000Z",
+      "salary_min": 110000,
+      "salary_max": 150000
+    }
+  ]
+}

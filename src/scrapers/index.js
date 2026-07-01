@@ -7,6 +7,8 @@ import { scrape as scrapeNewgrad } from './newgrad.js';
 import { scrape as scrapeGreenhouse } from './greenhouse.js';
 import { scrape as scrapeLever } from './lever.js';
 import { scrape as scrapeAshby } from './ashby.js';
+import { scrape as scrapeAdzuna } from './adzuna.js';
+import { scrape as scrapeUSAJobs } from './usajobs.js';
 
 /**
  * Runs a named scraper, upserts results into the DB, and records a scrape_runs entry.
@@ -48,6 +50,10 @@ export async function runScraper(sourceName, sourceConfig, db, options = {}) {
         const jobs = await scrape(options);
         results.push({ jobs });
       }
+    } else if (sourceName === 'adzuna') {
+      results = await scrapeAdzuna(sourceConfig, options);
+    } else if (sourceName === 'usajobs') {
+      results = await scrapeUSAJobs(sourceConfig, options);
     } else {
       throw new Error(`Unknown scraper: ${sourceName}`);
     }

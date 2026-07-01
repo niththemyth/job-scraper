@@ -1,0 +1,69 @@
+{
+  "SearchResult": {
+    "SearchResultItems": [
+      {
+        "MatchedObjectDescriptor": {
+          "PositionID": "usajobs-2210-001",
+          "PositionTitle": "IT Specialist (APPSW)",
+          "PositionLocation": [{ "LocationName": "Washington, DC" }],
+          "UserArea": {
+            "Details": {
+              "JobSummary": "Develop and maintain mission-critical software applications for federal agencies."
+            }
+          },
+          "PositionRemuneration": [
+            {
+              "MinimumRange": "80000",
+              "MaximumRange": "120000",
+              "RateIntervalCode": "PA"
+            }
+          ],
+          "PublicationStartDate": "2026-06-01T00:00:00.000Z",
+          "ApplyURI": ["https://www.usajobs.gov/job/usajobs-2210-001"]
+        }
+      },
+      {
+        "MatchedObjectDescriptor": {
+          "PositionID": "usajobs-2210-002",
+          "PositionTitle": "Software Engineer",
+          "PositionLocation": [{ "LocationName": "Arlington, VA" }],
+          "UserArea": {
+            "Details": {
+              "JobSummary": "Design and implement secure software systems for defense applications."
+            }
+          },
+          "PositionRemuneration": [
+            {
+              "MinimumRange": "95000",
+              "MaximumRange": "145000",
+              "RateIntervalCode": "PA"
+            }
+          ],
+          "PublicationStartDate": "2026-06-02T00:00:00.000Z",
+          "ApplyURI": ["https://www.usajobs.gov/job/usajobs-2210-002"]
+        }
+      },
+      {
+        "MatchedObjectDescriptor": {
+          "PositionID": "usajobs-2210-003",
+          "PositionTitle": "Data Scientist",
+          "PositionLocation": [{ "LocationName": "Bethesda, MD" }],
+          "UserArea": {
+            "Details": {
+              "JobSummary": "Apply machine learning and statistical methods to government datasets."
+            }
+          },
+          "PositionRemuneration": [
+            {
+              "MinimumRange": "100000",
+              "MaximumRange": "155000",
+              "RateIntervalCode": "PA"
+            }
+          ],
+          "PublicationStartDate": "2026-06-03T00:00:00.000Z",
+          "ApplyURI": ["https://www.usajobs.gov/job/usajobs-2210-003"]
+        }
+      }
+    ]
+  }
+}
