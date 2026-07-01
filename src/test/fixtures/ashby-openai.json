@@ -1,0 +1,34 @@
+{
+  "jobs": [
+    {
+      "id": "oa-001",
+      "title": "Software Engineer, Research",
+      "locationName": "San Francisco, CA",
+      "jobUrl": "https://jobs.ashbyhq.com/openai/oa-001",
+      "descriptionHtml": "<p>We are looking for a <strong>software engineer</strong> to support research infrastructure.</p><ul><li>Build tooling for ML researchers</li><li>Improve training pipelines</li></ul>",
+      "publishedAt": "2026-05-15T00:00:00.000Z",
+      "departmentName": "Research"
+    },
+    {
+      "id": "oa-002",
+      "title": "Senior Software Engineer, Applied AI",
+      "locationName": "New York, NY",
+      "jobUrl": "https://jobs.ashbyhq.com/openai/oa-002",
+      "descriptionHtml": "<p>Join the <em>Applied AI</em> team to ship products built on our latest models.</p><p>Requirements: Python, distributed systems experience.</p>",
+      "publishedAt": "2026-05-20T00:00:00.000Z",
+      "departmentName": "Applied AI",
+      "compensation": {
+        "summaryShort": "$200k-$370k"
+      }
+    },
+    {
+      "id": "oa-003",
+      "title": "Software Engineer, Infrastructure",
+      "locationName": "Toronto, Canada",
+      "jobUrl": "https://jobs.ashbyhq.com/openai/oa-003",
+      "descriptionHtml": "<h2>Infrastructure Role</h2><p>Build cloud infrastructure for our Toronto office.</p>",
+      "publishedAt": "2026-05-25T00:00:00.000Z",
+      "departmentName": "Infrastructure"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "abc001",
+    "text": "Software Engineer, Platform",
+    "categories": {
+      "location": "Los Angeles, CA",
+      "team": "Platform Engineering"
+    },
+    "hostedUrl": "https://jobs.lever.co/netflix/abc001",
+    "descriptionPlain": "Join our Platform Engineering team to build and scale the systems that power Netflix.",
+    "createdAt": 1748000000000
+  },
+  {
+    "id": "abc002",
+    "text": "Senior Software Engineer, Streaming",
+    "categories": {
+      "location": "Remote",
+      "team": "Streaming"
+    },
+    "hostedUrl": "https://jobs.lever.co/netflix/abc002",
+    "descriptionPlain": "Help us deliver streaming video to hundreds of millions of subscribers worldwide.",
+    "createdAt": 1748100000000
+  },
+  {
+    "id": "abc003",
+    "text": "Software Engineer, International",
+    "categories": {
+      "location": "Amsterdam, Netherlands",
+      "team": "International"
+    },
+    "hostedUrl": "https://jobs.lever.co/netflix/abc003",
+    "descriptionPlain": "Join our Amsterdam office to support international content and infrastructure.",
+    "createdAt": 1748200000000
+  }
+]

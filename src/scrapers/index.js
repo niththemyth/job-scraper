@@ -5,6 +5,8 @@
  */
 import { scrape as scrapeNewgrad } from './newgrad.js';
 import { scrape as scrapeGreenhouse } from './greenhouse.js';
+import { scrape as scrapeLever } from './lever.js';
+import { scrape as scrapeAshby } from './ashby.js';
 
 /**
  * Runs a named scraper, upserts results into the DB, and records a scrape_runs entry.
@@ -34,6 +36,10 @@ export async function runScraper(sourceName, sourceConfig, db, options = {}) {
       results = await scrapeNewgrad(sourceConfig, options);
     } else if (sourceName === 'greenhouse') {
       results = await scrapeGreenhouse(sourceConfig, options);
+    } else if (sourceName === 'lever') {
+      results = await scrapeLever(sourceConfig, options);
+    } else if (sourceName === 'ashby') {
+      results = await scrapeAshby(sourceConfig, options);
     } else {
       throw new Error(`Unknown scraper: ${sourceName}`);
     }
