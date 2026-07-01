@@ -1,0 +1,25 @@
+{
+  "searchResults": [
+    {
+      "positionId": "200480048",
+      "postingTitle": "Software Engineer",
+      "locations": [{ "name": "Cupertino, California, United States" }],
+      "jobSummary": "Join Apple's engineering team in Cupertino.",
+      "postingDate": "2026-06-01T00:00:00Z"
+    },
+    {
+      "positionId": "200480049",
+      "postingTitle": "Software Engineer, iOS",
+      "locations": [{ "name": "Austin, Texas, United States" }],
+      "jobSummary": "iOS engineer role in Austin.",
+      "postingDate": "2026-06-02T00:00:00Z"
+    },
+    {
+      "positionId": "200480050",
+      "postingTitle": "Software Engineer",
+      "locations": [{ "name": "London, United Kingdom" }],
+      "jobSummary": "SWE role in the London office.",
+      "postingDate": "2026-06-03T00:00:00Z"
+    }
+  ]
+}

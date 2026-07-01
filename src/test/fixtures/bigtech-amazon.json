@@ -1,0 +1,28 @@
+{
+  "hits": [
+    {
+      "id_icims": "2001",
+      "title": "Software Development Engineer",
+      "location": "Seattle, Washington",
+      "description_short": "Join our SDE team in Seattle.",
+      "job_path": "/jobs/2001",
+      "posted_date": "June 1, 2026"
+    },
+    {
+      "id_icims": "2002",
+      "title": "Software Development Engineer II",
+      "location": "New York, New York",
+      "description_short": "SDE II role in New York.",
+      "job_path": "/jobs/2002",
+      "posted_date": "June 2, 2026"
+    },
+    {
+      "id_icims": "2003",
+      "title": "Software Development Engineer",
+      "location": "London, United Kingdom",
+      "description_short": "SDE role in London.",
+      "job_path": "/jobs/2003",
+      "posted_date": "June 3, 2026"
+    }
+  ]
+}

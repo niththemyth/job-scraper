@@ -1,0 +1,35 @@
+{
+  "operationResult": {
+    "result": {
+      "jobs": [
+        {
+          "jobId": "4001",
+          "title": "Software Engineer",
+          "properties": {
+            "primaryWorkLocation": "Redmond, Washington",
+            "description": "SWE role at Microsoft headquarters.",
+            "postedDate": "2026-06-01T00:00:00Z"
+          }
+        },
+        {
+          "jobId": "4002",
+          "title": "Software Engineer II",
+          "properties": {
+            "primaryWorkLocation": "New York, New York",
+            "description": "SWE II role in the New York office.",
+            "postedDate": "2026-06-02T00:00:00Z"
+          }
+        },
+        {
+          "jobId": "4003",
+          "title": "Software Engineer",
+          "properties": {
+            "primaryWorkLocation": "Dublin, Ireland",
+            "description": "SWE role in the Dublin office.",
+            "postedDate": "2026-06-03T00:00:00Z"
+          }
+        }
+      ]
+    }
+  }
+}

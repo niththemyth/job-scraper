@@ -40,6 +40,14 @@ export async function runScraper(sourceName, sourceConfig, db, options = {}) {
       results = await scrapeLever(sourceConfig, options);
     } else if (sourceName === 'ashby') {
       results = await scrapeAshby(sourceConfig, options);
+    } else if (sourceName === 'bigtech') {
+      // sourceConfig is an array of company names; URLs are hardcoded in each adapter
+      results = [];
+      for (const name of sourceConfig) {
+        const { scrape } = await import(`./bigtech/${name}.js`);
+        const jobs = await scrape(options);
+        results.push({ jobs });
+      }
     } else {
       throw new Error(`Unknown scraper: ${sourceName}`);
     }

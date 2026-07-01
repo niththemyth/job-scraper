@@ -1,0 +1,28 @@
+{
+  "jobs": [
+    {
+      "id": "3001",
+      "title": "Software Engineer, Early Career",
+      "locations": [{ "display": "Mountain View, CA" }],
+      "description": "Join Google's early career engineering program.",
+      "applyUrl": "https://careers.google.com/jobs/results/3001",
+      "created": "2026-06-01T00:00:00Z"
+    },
+    {
+      "id": "3002",
+      "title": "Software Engineer",
+      "locations": [{ "display": "New York, NY" }],
+      "description": "SWE role at the New York office.",
+      "applyUrl": "https://careers.google.com/jobs/results/3002",
+      "created": "2026-06-02T00:00:00Z"
+    },
+    {
+      "id": "3003",
+      "title": "Software Engineer",
+      "locations": [{ "display": "London, United Kingdom" }],
+      "description": "SWE role in the London office.",
+      "applyUrl": "https://careers.google.com/jobs/results/3003",
+      "created": "2026-06-03T00:00:00Z"
+    }
+  ]
+}
