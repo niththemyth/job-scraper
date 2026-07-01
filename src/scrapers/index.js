@@ -4,6 +4,7 @@
  * upserts results into the DB, and records a scrape_runs row.
  */
 import { scrape as scrapeNewgrad } from './newgrad.js';
+import { scrape as scrapeGreenhouse } from './greenhouse.js';
 
 /**
  * Runs a named scraper, upserts results into the DB, and records a scrape_runs entry.
@@ -31,6 +32,8 @@ export async function runScraper(sourceName, sourceConfig, db, options = {}) {
 
     if (sourceName === 'newgrad') {
       results = await scrapeNewgrad(sourceConfig, options);
+    } else if (sourceName === 'greenhouse') {
+      results = await scrapeGreenhouse(sourceConfig, options);
     } else {
       throw new Error(`Unknown scraper: ${sourceName}`);
     }

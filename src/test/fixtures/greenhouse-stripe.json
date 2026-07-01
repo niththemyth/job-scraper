@@ -1,0 +1,50 @@
+{
+  "jobs": [
+    {
+      "id": 10001,
+      "title": "Software Engineer, Backend",
+      "location": { "name": "San Francisco, CA" },
+      "absolute_url": "https://boards.greenhouse.io/stripe/jobs/10001",
+      "content": "<p>We are looking for a <strong>backend engineer</strong> to join our team.</p><ul><li>Design APIs</li><li>Build scalable systems</li></ul>",
+      "departments": [{ "name": "Engineering" }],
+      "updated_at": "2026-06-01T00:00:00.000Z"
+    },
+    {
+      "id": 10002,
+      "title": "Software Engineer, Frontend",
+      "location": { "name": "Remote" },
+      "absolute_url": "https://boards.greenhouse.io/stripe/jobs/10002",
+      "content": "<p>Join our <em>frontend</em> team.</p><p>Requirements: React, TypeScript, CSS.</p>",
+      "departments": [{ "name": "Engineering" }],
+      "updated_at": "2026-06-02T00:00:00.000Z"
+    },
+    {
+      "id": 10003,
+      "title": "Senior Software Engineer",
+      "location": { "name": "New York, NY" },
+      "absolute_url": "https://boards.greenhouse.io/stripe/jobs/10003",
+      "content": "<h2>Senior Role</h2><p>Lead technical initiatives and mentor junior engineers.</p>",
+      "departments": [{ "name": "Engineering" }],
+      "updated_at": "2026-06-03T00:00:00.000Z"
+    },
+    {
+      "id": 10004,
+      "title": "Software Engineer",
+      "location": { "name": "London, United Kingdom" },
+      "absolute_url": "https://boards.greenhouse.io/stripe/jobs/10004",
+      "content": "<p>Based in our <strong>London</strong> office.</p>",
+      "departments": [{ "name": "Engineering" }],
+      "updated_at": "2026-06-04T00:00:00.000Z"
+    },
+    {
+      "id": 10005,
+      "title": "Software Engineer Intern",
+      "location": { "name": "Seattle, WA" },
+      "absolute_url": "https://boards.greenhouse.io/stripe/jobs/10005",
+      "content": "<p>Summer internship program for <em>students</em>. 12-week program.</p>",
+      "departments": [{ "name": "University" }],
+      "updated_at": "2026-06-05T00:00:00.000Z"
+    }
+  ],
+  "meta": { "total": 5 }
+}
