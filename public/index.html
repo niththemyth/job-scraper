@@ -3,9 +3,91 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="new-job-window-hours" content="24" />
   <title>Job Scraper</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
-  <h1>Job Scraper</h1>
+<body
+  data-skills="python,go,golang,c++,java,javascript,typescript,react,node,express,fastapi,flask,django,nestjs,postgresql,mysql,mongodb,aws,docker,kubernetes,ci/cd,machine learning,pytorch,langchain,scikit-learn,cuda,sql,rest"
+>
+
+  <!-- ── Top bar ─────────────────────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1 class="app-title">Job Scraper</h1>
+      <span id="new-count-badge" class="badge badge-new" style="display:none">0 new</span>
+    </div>
+    <div class="topbar-center">
+      <span id="last-scraped" class="last-scraped">Last scraped: —</span>
+      <button id="scrape-btn" class="btn btn-primary">Scrape Now</button>
+    </div>
+    <div class="topbar-right">
+      <label class="topbar-label" for="sort-select">Sort</label>
+      <select id="sort-select" class="control-select">
+        <option value="newest">Newest to me</option>
+        <option value="posted">Recently posted</option>
+        <option value="match">Best match</option>
+        <option value="salary">Highest salary</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- ── Filters bar ────────────────────────────────────────────────────── -->
+  <div class="filters-bar">
+    <select id="filter-source" class="control-select" title="Filter by source">
+      <option value="">All sources</option>
+    </select>
+
+    <input
+      id="filter-company"
+      type="text"
+      class="control-input"
+      placeholder="Company…"
+      autocomplete="off"
+    />
+
+    <input
+      id="filter-q"
+      type="text"
+      class="control-input"
+      placeholder="Search…"
+      autocomplete="off"
+    />
+
+    <label class="control-label">
+      <input id="filter-remote" type="checkbox" />
+      Remote only
+    </label>
+
+    <label class="control-label">
+      <input id="filter-has-salary" type="checkbox" />
+      Has salary
+    </label>
+
+    <label class="control-label range-label">
+      <span>Min score: <span id="score-value">0</span></span>
+      <input id="filter-min-score" type="range" min="0" max="10" value="0" class="control-range" />
+    </label>
+
+    <label class="control-label">
+      <input id="filter-entry-level" type="checkbox" />
+      Entry level only
+    </label>
+
+    <label class="control-label">
+      <input id="filter-hide-handled" type="checkbox" checked />
+      Hide applied/hidden
+    </label>
+  </div>
+
+  <!-- ── Job grid ──────────────────────────────────────────────────────── -->
+  <main id="jobs-grid" class="jobs-grid">
+    <div class="status-msg">Loading jobs…</div>
+  </main>
+
+  <!-- ── Pagination ─────────────────────────────────────────────────────── -->
+  <div id="pagination" class="pagination"></div>
+
+  <script src="app.js" type="module"></script>
 </body>
 </html>
