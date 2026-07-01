@@ -179,7 +179,7 @@ export async function runAlerts(db, config, options = {}) {
   // Check global kill-switch
   if (env.ALERTS_ENABLED === false) {
     console.log('[alerter] ALERTS_ENABLED is false — skipping.');
-    return;
+    return 0;
   }
 
   // -------------------------------------------------------------------------
@@ -199,7 +199,7 @@ export async function runAlerts(db, config, options = {}) {
           `[alerter] Rate limit: last alert was ${diffMinutes.toFixed(1)} min ago ` +
             `(min interval: ${intervalMinutes} min). Skipping.`,
         );
-        return;
+        return 0;
       }
     }
   }
@@ -243,7 +243,7 @@ export async function runAlerts(db, config, options = {}) {
 
   if (jobs.length === 0) {
     console.log('[alerter] No new matching jobs to alert on.');
-    return;
+    return 0;
   }
 
   console.log(`[alerter] Sending digest for ${jobs.length} job(s).`);
@@ -271,4 +271,5 @@ export async function runAlerts(db, config, options = {}) {
   db.prepare(`UPDATE jobs SET alerted_at = ? WHERE id IN (${placeholders})`).run(now, ...ids);
 
   console.log(`[alerter] Stamped alerted_at on ${ids.length} job(s).`);
+  return ids.length;
 }

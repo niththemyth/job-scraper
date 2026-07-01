@@ -194,13 +194,13 @@ export function createJobsRouter(db, config = {}) {
 
   /**
    * POST /alerts/test — trigger an immediate alert run, bypassing rate limiting.
-   * Response: { sent: true }
+   * Response: { sent: true, count: N }
    */
   router.post('/alerts/test', async (req, res) => {
     try {
       const { runAlerts } = await import('../alerter.js');
-      await runAlerts(db, config, { forceSkipRateLimit: true });
-      res.json({ sent: true });
+      const count = await runAlerts(db, config, { forceSkipRateLimit: true });
+      res.json({ sent: true, count: count ?? 0 });
     } catch (err) {
       console.error('[api] /alerts/test error:', err.message);
       res.status(500).json({ error: err.message });
