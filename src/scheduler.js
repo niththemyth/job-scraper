@@ -5,15 +5,27 @@
 import cron from 'node-cron';
 import { runScraper } from './scrapers/index.js';
 
-// Lazy-load alerter so it's a no-op if src/alerter.js doesn't exist yet.
-let runAlerts = async () => {};
-try {
-  const mod = await import('./alerter.js');
-  if (typeof mod.runAlerts === 'function') {
-    runAlerts = mod.runAlerts;
+// Module-level cache for lazy-loaded alerter
+let _runAlerts = null;
+
+/**
+ * Lazily loads and caches the alerter module.
+ * @returns {Promise<Function>}
+ */
+async function getRunAlerts() {
+  if (_runAlerts) return _runAlerts;
+  try {
+    const mod = await import('./alerter.js');
+    if (typeof mod.runAlerts === 'function') {
+      _runAlerts = mod.runAlerts;
+    } else {
+      _runAlerts = () => {};
+    }
+  } catch {
+    // alerter not yet implemented — safe to ignore
+    _runAlerts = () => {};
   }
-} catch {
-  // alerter not yet implemented — safe to ignore
+  return _runAlerts;
 }
 
 /**
@@ -23,7 +35,8 @@ try {
  * @param {{ sources: object, env: object, profile: object }} config
  */
 export async function runAllScrapers(db, config) {
-  const { sources, profile } = config;
+  const sources = config?.sources ?? {};
+  const profile = config?.profile ?? null;
 
   // Build the list of [sourceName, sourceConfig] pairs
   const tasks = [];
@@ -65,6 +78,7 @@ export async function runAllScrapers(db, config) {
 
   // Trigger alerts (no-op if alerter not implemented)
   try {
+    const runAlerts = await getRunAlerts();
     await runAlerts(db, config);
   } catch (err) {
     console.error('[scheduler] Alert error:', err.message);
