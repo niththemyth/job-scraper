@@ -276,7 +276,7 @@ function renderCard(job, card) {
     </div>
 
     <div class="card-badges">
-      <span class="badge score-badge ${scoreClass}" title="Match score">${esc(String(job.match_score ?? 0))}/10</span>
+      <span class="badge score-badge ${scoreClass}" title="Match score">${esc(String(job.match_score ?? 0))}</span>
       ${isNew ? '<span class="badge badge-new">NEW</span>' : ''}
       <span class="badge badge-source">${esc(job.source)}</span>
       ${job.sponsorship ? `<span class="badge badge-sponsorship" title="Sponsorship">${esc(job.sponsorship)}</span>` : ''}

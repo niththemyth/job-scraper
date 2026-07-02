@@ -74,7 +74,11 @@ export async function scrape(sources, options = {}) {
     // Skip non-URL entries (e.g. jobrightMarkdown: false)
     if (typeof value !== 'string') continue;
 
-    results.push(await processFeed(key, value, options));
+    try {
+      results.push(await processFeed(key, value, options));
+    } catch (err) {
+      console.warn(`[newgrad] feed "${key}" failed: ${err.message}`);
+    }
   }
 
   return results;

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { runMigrations, db } from './db.js';
 import { env, sources, profile } from './config.js';
 import { createJobsRouter } from './api/jobs.js';
-import { startScheduler, runAllScrapers } from './scheduler.js';
+import { startScheduler } from './scheduler.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

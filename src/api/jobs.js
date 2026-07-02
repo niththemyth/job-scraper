@@ -75,7 +75,8 @@ export function createJobsRouter(db, config = {}) {
       conditions.push('(title LIKE ? OR company LIKE ? OR description LIKE ?)');
       params.push(`%${q}%`, `%${q}%`, `%${q}%`);
     }
-    if (remote === '1' || remote === 'true') {
+    // Apply remote filter: explicit query param takes priority; fall back to REMOTE_ONLY env default
+    if (remote === '1' || remote === 'true' || (remote === undefined && config.env?.REMOTE_ONLY === true)) {
       conditions.push('remote = 1');
     }
     if (since) {

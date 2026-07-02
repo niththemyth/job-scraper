@@ -114,13 +114,17 @@ export async function scrape(slugs, options = {}) {
   const results = [];
 
   for (const slug of slugs) {
-    const rawJobs = options?.fixture
-      ? loadFixture(options.fixture)
-      : await fetchSlug(slug);
+    try {
+      const rawJobs = options?.fixture
+        ? loadFixture(options.fixture)
+        : await fetchSlug(slug);
 
-    const jobs = rawJobs.map(job => normalizeAshbyJob(job, slug));
+      const jobs = rawJobs.map(job => normalizeAshbyJob(job, slug));
 
-    results.push({ source: 'ashby', jobs });
+      results.push({ source: 'ashby', jobs });
+    } catch (err) {
+      console.warn(`[ashby] slug "${slug}" failed: ${err.message}`);
+    }
   }
 
   return results;
